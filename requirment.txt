@@ -1,0 +1,38 @@
+user
+    -register
+    -login jwt(email ,role)
+    -log out
+    -update user
+
+  product
+    -create new product    ***
+    -get all products  with pagination
+    -get one products           
+    -get product by category
+    -update product "admin"
+    -delete product "admin"
+
+catagory "admin"
+
+    -create catagory ***
+    -get all category
+    -update catagory "name"
+    -delete catagory
+
+cart
+    -add to cart  
+    -get cart
+    -update quantity of product inside cart
+    -delete one product from cart
+    -clear cart
+
+    -place order
+
+orders
+   -get all orders
+   -get all orders for one user
+   update order  "admin"
+
+   
+payment
+
