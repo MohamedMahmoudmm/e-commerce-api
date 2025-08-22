@@ -22,9 +22,7 @@ export const login = async(req,res)=>{
     }
     
     let token = jwt.sign(
-        {_id : findUser._id, role: findUser.role, email: findUser.email}, 
-        "mearn",
-        { expiresIn: "1h" }
+        {_id : findUser._id, role: findUser.role, email: findUser.email}, "mearn",{ expiresIn: "1h" }
     )
 
    
@@ -53,21 +51,13 @@ export const updateUser = async (req, res) => {
   try {
     const userId = req.user._id;
     const updates = req.body;
-
     if (updates.password) {
       updates.password = await bycrpt.hash(updates.password, 8);
     }
-
-    const updatedUser = await userModel.findByIdAndUpdate(
-      userId,
-      updates,
-      { new: true } 
-    ).select("-password -token");
-
+    const updatedUser = await userModel.findByIdAndUpdate(userId,updates,{ new: true }).select("-password -token");
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found" });
     }
-
     res.status(200).json({
       message: "User updated successfully",
       user: updatedUser,

@@ -9,7 +9,7 @@ export const template = (email) => {
   <style>
     body {
       font-family: 'Helvetica', Arial, sans-serif;
-      background-color: #f4f6f8;
+      background-color: #f88558ff;
       margin: 0;
       padding: 0;
       color: #333;
@@ -61,7 +61,7 @@ export const template = (email) => {
 <body>
   <div class="container">
     <div class="logo">
-      <img src="https://i.ibb.co/sQ7KQ2x/logo.png" alt="Company Logo" />
+      <img src="https://freevector-images.s3.amazonaws.com/uploads/vector/preview/36682/36682.png" alt="Company Logo" />
     </div>
     <h1>Verify Your Email Address</h1>
     <p>Welcome! Please confirm your email address to complete your account setup. Just click the button below:</p>
