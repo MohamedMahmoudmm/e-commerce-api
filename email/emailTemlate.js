@@ -17,7 +17,7 @@ export const template = (email) => {
     .container {
       max-width: 600px;
       margin: 30px auto;
-      background: #fff;
+      background: #f88558ff;
       border-radius: 8px;
       padding: 30px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -61,7 +61,7 @@ export const template = (email) => {
 <body>
   <div class="container">
     <div class="logo">
-      <img src="https://i.ibb.co/sQ7KQ2x/logo.png" alt="Company Logo" />
+      <img src="https://freevector-images.s3.amazonaws.com/uploads/vector/preview/36682/36682.png" alt="Company Logo" />
     </div>
     <h1>Verify Your Email Address</h1>
     <p>Welcome! Please confirm your email address to complete your account setup. Just click the button below:</p>
