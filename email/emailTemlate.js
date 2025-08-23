@@ -9,7 +9,7 @@ export const template = (email) => {
   <style>
     body {
       font-family: 'Helvetica', Arial, sans-serif;
-      background-color: #f4f6f8;
+      background-color: #f88558ff;
       margin: 0;
       padding: 0;
       color: #333;
