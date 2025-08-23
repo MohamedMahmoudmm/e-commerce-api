@@ -3,6 +3,9 @@ import categoryModel from "../models/categoryModel.js";
 const createCategory = (req, res) => {
 
     try {
+        if(req.user.role !== "admin") {
+            return res.status(403).send({ status: "fail", message: "Access denied" })
+        }
         const { cat_name, cat_desc } = req.body
         if (!cat_name) {
             return res.status(400).send({ status: "fail", message: "Category cat_name is required" })
@@ -20,6 +23,9 @@ const createCategory = (req, res) => {
 
 const getAllCategories = async (req, res) => {
     try {
+        if(req.user.role !== "admin") {
+            return res.status(403).send({ status: "fail", message: "Access denied" })
+        }
         const categories = await categoryModel.find()
         res.status(200).send({ status: "success", data: categories })
     } catch (error) {
@@ -29,6 +35,9 @@ const getAllCategories = async (req, res) => {
 
 const updateCategory = async (req, res) => {
     try {
+        if(req.user.role !== "admin") {
+            return res.status(403).send({ status: "fail", message: "Access denied" })
+        }
         const { id } = req.params
         const { cat_name, cat_desc } = req.body
         if (!cat_name && !cat_desc) {
@@ -46,6 +55,9 @@ const updateCategory = async (req, res) => {
 
 const deleteCategory = async (req, res) => {
     try {
+        if(req.user.role !== "admin") {
+            return res.status(403).send({ status: "fail", message: "Access denied" })
+        }
         const { id } = req.params
         const category = await categoryModel.findByIdAndDelete(id)
         if (!category) {
