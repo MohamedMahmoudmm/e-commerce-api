@@ -20,14 +20,13 @@ export const login = async(req,res)=>{
     if(findUser.isConfirmed === false){
         return res.status(403).json({message:"Account not verified"})
     }
-    
+          if (findUser.token) {
+    return res.status(400).json({ message: "User already logged in " });
+  }
     let token = jwt.sign(
-        {_id : findUser._id, role: findUser.role, email: findUser.email}, "mearn",{ expiresIn: "1h" }
+        {_id : findUser._id, role: findUser.role, email: findUser.email}, "mearn",{ expiresIn: "24h" }
     )
-
-   
     await userModel.findByIdAndUpdate(findUser._id, { token });
-
     return res.json({message:"User login successfully", user:findUser, token:token})
 }
 
@@ -36,14 +35,11 @@ export const logout = async (req, res) => {
   if (!token) {
     return res.status(400).json({ message: "No token provided" });
   }
-
   let user = await userModel.findOne({ token });
   if (!user) {
     return res.status(401).json({ message: "Invalid token" });
   }
-
   await userModel.findByIdAndUpdate(user._id, { token: null });
-
   return res.status(200).json({ message: "User logged out successfully" });
 };
 
