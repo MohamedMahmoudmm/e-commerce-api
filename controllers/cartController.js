@@ -1,4 +1,5 @@
 import cartModel from "../models/cartModel.js"
+import orderModel from "../models/orderModel.js"
 //add product in Cart
 export const addToCart = async (req, res) => {
     try {
@@ -142,11 +143,15 @@ const userId = req.user.userId;
       product.stock -= item.quantity;
       await product.save();
     }
-
-    const order = new Order({
+    if(!req.body.shippingAddress){
+      return res.status(400).json({ message: 'Shipping address is required' });
+    }
+    const order = new orderModel({
       userId,
       items: orderItems,
-      totalAmount,
+      totalPrice: totalAmount,
+      paymentMethod: req.body.paymentMethod || 'cash',
+      shippingAddress: req.body.shippingAddress,
     });
 
     await order.save();
