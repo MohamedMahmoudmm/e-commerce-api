@@ -4,7 +4,7 @@ import userRouter from './router/user.route.js';
 import categoryRouter from './router/category.route.js';
 import orderRouter from './router/order.route.js';
 import productRouter from './router/product.route.js';
-import errorHandler from './middleWare/errorHandler.js';
+import {errorHandler} from './middleWare/errorHandler.js';
 const app = express();
 app.use(express.json());
 app.use(userRouter);
