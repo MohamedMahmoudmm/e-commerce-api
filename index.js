@@ -1,11 +1,15 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import userRouter from './router/user.route.js';
+import categoryRouter from './router/category.route.js';
+import orderRouter from './router/order.route.js';
 import productRouter from './router/product.route.js';
 import errorHandler from './middleWare/errorHandler.js';
 const app = express();
 app.use(express.json());
 app.use(userRouter);
+app.use('/categories',categoryRouter);
+app.use('/orders', orderRouter);
 app.use("/api/products", productRouter);
 app.use(errorHandler);
 

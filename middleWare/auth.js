@@ -10,9 +10,7 @@ export const auth = async (req, res, next) => {
 
     let user = await userModel.findOne({ _id: decoded._id, token });
     if (!user) {
-      return res
-        .status(401)
-        .json({ message: "Token is invalid or logged out" });
+      return res.status(401).json({ message: "Token is invalid or logged out" });
     }
 
     req.user = decoded;
