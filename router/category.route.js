@@ -1,7 +1,7 @@
 import express from "express";
 const router = express.Router();
 import categoryController from "../controllers/categoryController.js";
-import {auth} from "../middleware/auth.js";
+import {auth} from "../middleWare/auth.js";
 
 router.post("/",auth, categoryController.createCategory);
 router.get("/", auth,categoryController.getAllCategories);

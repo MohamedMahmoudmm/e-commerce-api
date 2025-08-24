@@ -7,19 +7,19 @@ import {
   updateProduct,
   deleteProduct,
 } from "../controllers/ProductController.js";
-import { protect } from "../middleWare/auth.js";
+import { auth } from "../middleWare/auth.js";
 import { admin } from "../middleWare/checkAdmin.js";
 
 const productRouter = express.Router();
 
 
-router.get("/", getAllProducts);                // Get all products (paginated)
-router.get("/:id", getProductById);             // Get single product by ID
-router.get("/category/:category", getProductsByCategory); // Get products by category
+productRouter.get("/", getAllProducts);                // Get all products (paginated)
+productRouter.get("/:id", getProductById);             // Get single product by ID
+productRouter.get("/category/:category", getProductsByCategory); // Get products by category
 
 
-router.post("/", protect, admin, createProduct);       // Admin create
-router.put("/:id", protect, admin, updateProduct);     // Admin update
-router.delete("/:id", protect, admin, deleteProduct);  // Admin soft delete
+productRouter.post("/", auth, admin, createProduct);       // Admin create
+productRouter.put("/:id", auth, admin, updateProduct);     // Admin update
+productRouter.delete("/:id", auth, admin, deleteProduct);  // Admin soft delete
 
 export default productRouter;
