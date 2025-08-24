@@ -1,6 +1,6 @@
 import orderController from "../controllers/orderController.js";
 import express from "express";
-import {auth} from "../middleware/auth.js";
+import {auth} from "../middleWare/auth.js";
 const router = express.Router();
 router.get("/", auth, orderController.getAllOrders);
 router.get("/user/:userId", auth, orderController.getUserOrders);

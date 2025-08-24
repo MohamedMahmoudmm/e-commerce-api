@@ -5,12 +5,14 @@ import categoryRouter from './router/category.route.js';
 import orderRouter from './router/order.route.js';
 import productRouter from './router/product.route.js';
 import {errorHandler} from './middleWare/errorHandler.js';
+import cartRoute from './router/cart.route.js';
 const app = express();
 app.use(express.json());
 app.use(userRouter);
 app.use('/categories',categoryRouter);
 app.use('/orders', orderRouter);
 app.use("/api/products", productRouter);
+app.use('/cart', cartRoute);
 app.use(errorHandler);
 
 

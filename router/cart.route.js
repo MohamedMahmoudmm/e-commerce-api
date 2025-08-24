@@ -3,10 +3,10 @@ import { addToCart, myCart, updateQuantity, DeleteCart, clearCart, placeOrder } 
 
 import {auth} from "../middleWare/auth.js";
 const cartRoute = express.Router()
-cartRoute.post('/cart', auth, addToCart)
-cartRoute.get('/cart', auth, myCart)
-cartRoute.put('/cart/:id', auth, updateQuantity)
-cartRoute.delete('/cart/:id', auth, DeleteCart)
-cartRoute.delete('/cart', auth, clearCart)
-cartRoute.post('/cart/order', auth, placeOrder)
+cartRoute.post('/', auth, addToCart)
+cartRoute.get('/', auth, myCart)
+cartRoute.put('/:id', auth, updateQuantity)
+cartRoute.delete('/:productId', auth, DeleteCart) //deleteone by product-id   
+cartRoute.delete('/', auth, clearCart)
+cartRoute.post('/order', auth, placeOrder)
 export default cartRoute

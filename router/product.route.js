@@ -13,9 +13,9 @@ import { admin } from "../middleWare/checkAdmin.js";
 const productRouter = express.Router();
 
 
-productRouter.get("/", getAllProducts);                // Get all products (paginated)
-productRouter.get("/:id", getProductById);             // Get single product by ID
-productRouter.get("/category/:category", getProductsByCategory); // Get products by category
+productRouter.get("/",auth, getAllProducts);                // Get all products (paginated)
+productRouter.get("/:id", auth,getProductById);             // Get single product by ID
+productRouter.get("/category/:id",auth, getProductsByCategory); // Get products by id
 
 
 productRouter.post("/", auth, admin, createProduct);       // Admin create
