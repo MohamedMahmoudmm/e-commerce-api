@@ -5,7 +5,7 @@ import sendEmail from "../email/email.js";
 
 
 export const signUp =  async(req,res)=>{
-    req.body.password = await bycrpt.hash(req.body.password,8);    
+    req.body.password = await bcrypt.hash(req.body.password,8);    
     let addUser = await userModel.insertMany(req.body);
     addUser[0].password = undefined;
     sendEmail(req.body.email)
@@ -14,7 +14,7 @@ export const signUp =  async(req,res)=>{
 
 export const login = async(req,res)=>{
     let findUser = await userModel.findOne({email : req.body.email})
-    if(!findUser || !bycrpt.compareSync(req.body.password, findUser.password)){
+    if(!findUser || !bcrypt.compareSync(req.body.password, findUser.password)){
         return res.status(422).json({message:"Invalid email or password"})
     }
     if(findUser.isConfirmed === false){
@@ -48,7 +48,7 @@ export const updateUser = async (req, res) => {
     const userId = req.user._id;
     const updates = req.body;
     if (updates.password) {
-      updates.password = await bycrpt.hash(updates.password, 8);
+      updates.password = await bcrypt.hash(updates.password, 8);
     }
     const updatedUser = await userModel.findByIdAndUpdate(userId,updates,{ new: true }).select("-password -token");
     if (!updatedUser) {
