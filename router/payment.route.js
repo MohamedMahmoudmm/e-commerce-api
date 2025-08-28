@@ -4,7 +4,7 @@ import { createPayment, handleWebhook } from "../controllers/paymentController.j
 import {auth} from "../middleWare/auth.js";
 const paymentRouter = express.Router();
 
-paymentRouter.post("/create", createPayment);
+//paymentRouter.post("/create",auth, createPayment);
 
 // webhook يستخدم bodyParser.raw
 paymentRouter.post("/webhook", bodyParser.raw({ type: "application/json" }), handleWebhook);

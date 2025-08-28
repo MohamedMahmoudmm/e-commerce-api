@@ -7,7 +7,8 @@ import productRouter from './router/product.route.js';
 import paymentRouter from './router/payment.route.js';
 import {errorHandler} from './middleWare/errorHandler.js';
 import cartRoute from './router/cart.route.js';
-
+import dotenv from 'dotenv';
+dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(userRouter);
@@ -18,7 +19,7 @@ app.use('/cart', cartRoute);
 app.use(errorHandler);
 app.use("/payments", paymentRouter);
 
-mongoose.connect('mongodb+srv://mm4574:mm4574@cluster0.xq5ja.mongodb.net/e-commerce').then(() => {
+mongoose.connect(process.env.URL).then(() => {
     console.log('Connected to MongoDB');
   }).catch((error) => {
     console.error('Failed to connect to MongoDB:', error);

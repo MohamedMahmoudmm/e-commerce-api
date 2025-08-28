@@ -1,21 +1,21 @@
 import 'dotenv/config';
 import Stripe from "stripe";
 import Payment from "../models/paymentModel.js";
+import orderModel from '../models/orderModel.js';
 import mongoose from "mongoose";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const createPayment = async (req, res, next) => {
     try {
-        const { amount, orderId, userId } = req.body;
+        const {orderId } = req.body;
+        const amount= await orderModel.findById(orderId).select('totalPrice');
+        const userId = req.user._id;
 
         // تحقق من صحة IDs
         if (!mongoose.Types.ObjectId.isValid(userId) || !mongoose.Types.ObjectId.isValid(orderId)) {
             return res.status(400).json({ error: "Invalid userId or orderId" });
         }
-
-        const userObjId = new mongoose.Types.ObjectId(userId);
-        const orderObjId = new mongoose.Types.ObjectId(orderId);
 
         const paymentIntent = await stripe.paymentIntents.create({
             amount: amount * 100,
@@ -29,8 +29,8 @@ export const createPayment = async (req, res, next) => {
 
 
         const payment = await Payment.create({
-            userId: userObjId,
-            orderId: orderObjId,
+            userId: userId,
+            orderId: orderId,
             amount,
             currency: "usd",
             status: "pending",
@@ -48,19 +48,13 @@ export const createPayment = async (req, res, next) => {
 
 
 export const handleWebhook = async (req, res) => {
-    const sig = req.headers["stripe-signature"];
-    let event;
-
-    try {
-        event = event = req.body;
-
-    } catch (err) {
-        console.error("Webhook signature verification failed:", err.message);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
+    console.log("webhook called");
+        
+    let event=req.body;
 
     if (event.type === "payment_intent.succeeded") {
         const paymentIntent = event.data.object;
+        
         await Payment.findOneAndUpdate(
             { stripePaymentIntentId: paymentIntent.id },
             { status: "succeeded" }
@@ -76,4 +70,5 @@ export const handleWebhook = async (req, res) => {
     }
 
     res.json({ received: true });
+    
 };

@@ -1,6 +1,12 @@
 import cartModel from "../models/cartModel.js"
 import orderModel from "../models/orderModel.js"
 import productModel from "../models/ProductModule.js"
+import Stripe from "stripe";
+import Payment from "../models/paymentModel.js";
+import mongoose from "mongoose";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
 //add product in Cart
 export const addToCart = async (req, res) => {
     try {
@@ -125,7 +131,7 @@ export const placeOrder =async (req, res) => {
 const userId =req.user._id;
   try {
     const cart = await cartModel.findOne({ userId }).populate('items.productId');
-    if (!cart || cart.items.length === 0) return res.status(400).json({ message: 'Cart is empty' });
+    if (!cart || cart.items.length === 0) return res.status(400).json({status:"fail", message: 'your Cart is empty',data:null });
 
     let totalAmount = 0;
     const orderItems = [];
@@ -133,7 +139,7 @@ const userId =req.user._id;
     for (const item of cart.items) {
       const product = item.productId;
       if (product.stock < item.quantity) {
-        return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
+        return res.status(400).json({ status:"fail",message: `Insufficient stock for ${product.name}`,data:null });
       }
       totalAmount += product.price * item.quantity;
       orderItems.push({
@@ -146,8 +152,8 @@ const userId =req.user._id;
       product.stock -= item.quantity;
       await product.save();
     }
-    if(!req.body.shippingAddress){
-      return res.status(400).json({ message: 'Shipping address is required' });
+    if(!req.body.shippingAddress ||!req.body){
+      return res.status(400).json({status:"fail", message: 'Shipping address is required',data:null });
     }
     const order = new orderModel({
       userId,
@@ -157,16 +163,40 @@ const userId =req.user._id;
       shippingAddress: req.body.shippingAddress,
     });
 
-    await order.save();
+    const newOrder = await order.save();
 
     // Clear the cart after placing the order
-    cart.items = [];
-    await cart.save();
+   
 
-    res.status(200).json({ message: 'Order placed successfully', order });
+    const paymentIntent = await stripe.paymentIntents.create({
+                amount: totalAmount * 100,
+                currency: "usd",
+                metadata: { orderId: newOrder._id.toString(), userId },
+                automatic_payment_methods: {
+                    enabled: true,
+                    allow_redirects: 'never'
+                }
+            });
+    
+    
+            const payment = await Payment.create({
+                userId: userId,
+                orderId: newOrder._id,
+                amount: totalAmount,
+                currency: "usd",
+                status: "pending",
+                stripePaymentIntentId: paymentIntent.id
+            });
+    
+           cart.items = [];
+    await cart.save();
+    res.status(200).json({
+      status: "success", message: 'Order placed successfully', data: order,payment
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
+    res.status(500).json({status:"error", message: error.message, data:null});
   }
 }
+
 
 
