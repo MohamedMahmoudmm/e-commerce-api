@@ -11,7 +11,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 const app = express();
 app.use(express.json());
-app.use(userRouter);
+app.use('/user',userRouter);
 app.use('/categories',categoryRouter);
 app.use('/orders', orderRouter);
 app.use("/api/products", productRouter);
