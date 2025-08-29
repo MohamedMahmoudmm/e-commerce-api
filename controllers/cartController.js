@@ -3,43 +3,52 @@ import orderModel from "../models/orderModel.js"
 import productModel from "../models/ProductModule.js"
 import Stripe from "stripe";
 import Payment from "../models/paymentModel.js";
-import mongoose from "mongoose";
-
+import {asyncHandler} from "../middleWare/errorHandler.js"
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 //add product in Cart
-export const addToCart = async (req, res) => {
-    try {
-        //get the data i need to insert in cart model
-        const { productId, quantity } = req.body
-        const userId = req.user._id
-        let cart = await cartModel.findOne({userId})
-        // if the cart not found make an instance from cart model and fill the fields
-        if (!cart) {
-            cart = new cartModel({
-                userId,
-                items: [{ productId, quantity }]
-            })
-        } else {
-            //find index looping in my array[cart.items] and returns the index of the element incase the element not found it return -1
-            // and i take every item and compare the productId inside it but i need to convert it to string because the Id in my DB is objectID 
-            //unlike the id from req.body which is the type of string
-            const itemIndex = cart.items.findIndex((item) => item.productId.toString() === productId)
-            if (itemIndex > -1) {// it means that this product already exist in the cart so i just decrease the qty
-                cart.items[itemIndex].quantity += quantity;
-            } else {//push the new product in the array[cart.items]
-                cart.items.push({ productId, quantity });
+export const addToCart = asyncHandler(async (req, res) => {
+    const { productId, quantity } = req.body;
+    const userId = req.user._id;
+    //  check if product exists and has enough stock
+    const product = await productModel.findById(productId);
+    if (!product) { res.status(404); throw new Error(" product not found ");}
+    if (product.stock < quantity) {return res.status(400).json({ status: "fail", message: "Not enough stock available" });}
+    let cart = await cartModel.findOne({ userId });
+    if (!cart) {
+        cart = new cartModel({
+            userId,
+            items: [{ productId, quantity }]
+        });
+    } else {
+        const itemIndex = cart.items.findIndex(
+            (item) => item.productId.toString() === productId
+        );
+        if (itemIndex > -1) {
+            // لو المنتج موجود بالفعل في الكارت
+            const newQty = cart.items[itemIndex].quantity + quantity;
+            if (product.stock < newQty) {
+                return res.status(400).json({
+                    status: "fail",
+                    message: "Not enough stock for this quantity"
+                });
             }
+            cart.items[itemIndex].quantity = newQty;
+        } else {
+            cart.items.push({ productId, quantity });
         }
-        await cart.save();
-        res.status(200).json(cart)
-    } catch (error) {
-        res.status(500).json({ message: "error", error: error.message })
     }
-}
+    await cart.save();
+    res.status(201).json({ status: "success", message: "Product added to cart", data: cart });
+});
+
+
+
+
+
 // display the cart for specific user
-export const myCart = async (req, res) => {
-    try {
+export const myCart =asyncHandler( async (req, res) => {
+
         //search in the collection for the first document userId be in it match req.user._id
         const cart = await cartModel.findOne({ userId: req.user._id })
             //populate return the data of the product and replace it with objectId so the data will be like this
@@ -48,12 +57,10 @@ export const myCart = async (req, res) => {
             //   { productId: { _id:"66c...", name:"Case",    price: 200  }, quantity: 1 },
             // ]
             .populate('items.productId');
-        if (!cart) return res.status(404).json({ message: 'Cart not found' });
-        res.status(200).json(cart)
-    } catch (error) {
-        res.status(500).json({ message: "error", error: err.message })
-    }
-}
+        if (!cart) { res.status(404); throw new Error(" cart not found ");}
+        res.status(200).json({ status: "success", message: "My cart", data: cart });
+     
+})
   // update product qty in the cart 
 // export const updateQuantity = async (req, res) => {
 //   try {
@@ -73,15 +80,13 @@ export const myCart = async (req, res) => {
 // };
 
 // update product qty in the cart 
-export const updateQuantity = async (req, res) => {
+export const updateQuantity =asyncHandler( async (req, res) => {
  const { productId, quantity } = req.body;
   const userId = req.user.userId;
-
-  try {
     const cart = await cartModel.findOne({ userId: req.user._id });
-    if (!cart) return res.status(404).json({ message: 'Cart not found' });
+    if (!cart) { res.status(404); throw new Error(" cart not found ");};
     const product = await productModel.findById(productId);
-    if (!product) return res.status(404).json({ message: 'Product not found' });
+    if (!product){ res.status(404); throw new Error(" product not found ");};
     if (product.stock < quantity) return res.status(400).json({ message: 'Insufficient stock' });
 
     const itemIndex = cart.items.findIndex(item => item.productId.toString() === productId);
@@ -89,47 +94,35 @@ export const updateQuantity = async (req, res) => {
 
     cart.items[itemIndex].quantity = quantity;
     await cart.save();
-    res.status(200).json({ message: 'Cart updated', cart });
-  } catch (error) {
-    res.status(500).json({ message: ' error', error : error.message });
-  }
-};
+    res.status(200).json({ message: 'Cart updated', cart});
+  } 
+);
 
-export const DeleteCart = async (req, res) => {
+export const DeleteCart =asyncHandler( async (req, res) => {
   const { productId } = req.params;
   const userId = req.user._id;
-
-  try {
     const cart = await cartModel.findOne({ userId });
-    if (!cart) return res.status(404).json({ message: 'Cart not found' });
-
+    if (!cart){ res.status(404); throw new Error(" cart not found ");};
     cart.items = cart.items.filter(item => !item.productId.equals(productId));
-
     await cart.save();
     res.status(200).json({ message: 'Product removed from cart', cart });
-  } catch (error) {
-    res.status(500).json({ message: 'error', error: error.message  });
-  }
-};
+});
 
 
-export const clearCart =async (req, res) => {
+export const clearCart =asyncHandler( async (req, res) => {
  const userId = req.user._id;
-  try {
+
     const cart = await cartModel.findOne({ userId });
-    if (!cart) return res.status(404).json({ message: 'Cart not found' });
+    if (!cart) { res.status(404); throw new Error(" cart not found ");};
     cart.items = [];
     await cart.save();
     res.status(200).json({ message: 'Cart cleared', cart });
-  } catch (error) {
-    res.status(500).json({ message: 'Server error', error });
-  }
-};
+  });
 
 
-export const placeOrder =async (req, res) => {
+export const placeOrder = asyncHandler(async (req, res) => {
 const userId =req.user._id;
-  try {
+
     const cart = await cartModel.findOne({ userId }).populate('items.productId');
     if (!cart || cart.items.length === 0) return res.status(400).json({status:"fail", message: 'your Cart is empty',data:null });
 
@@ -193,10 +186,7 @@ const userId =req.user._id;
     res.status(200).json({
       status: "success", message: 'Order placed successfully', data: order,payment
     });
-  } catch (error) {
-    res.status(500).json({status:"error", message: error.message, data:null});
-  }
-}
+  });
 
 
 
