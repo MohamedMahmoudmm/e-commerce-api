@@ -26,5 +26,3 @@ This project provides essential features like user authentication, product manag
 - **express-validator**
 
 ---
-
-## 📂 Project Structure
