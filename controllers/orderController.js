@@ -3,7 +3,7 @@ import {asyncHandler} from "../middleWare/errorHandler.js";
 
 const getAllOrders =asyncHandler( async (req, res) => {
      
-    const orders = await OrderModel.find().populate('userId', 'name email').populate('items.productId', 'name');
+    const orders = await OrderModel.find().populate('userId', 'name email').populate('items.productId', 'name images');
     res.status(200).json({status:"success", message: 'All orders fetched', data: orders });
   
 })

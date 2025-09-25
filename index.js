@@ -8,9 +8,11 @@ import paymentRouter from './router/payment.route.js';
 import {errorHandler} from './middleWare/errorHandler.js';
 import cartRoute from './router/cart.route.js';
 import dotenv from 'dotenv';
+import cors from 'cors';
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use(cors({origin:"http://localhost:3001"}));
 app.use('/user',userRouter);
 app.use('/categories',categoryRouter);
 app.use('/orders', orderRouter);
@@ -24,6 +26,7 @@ mongoose.connect(process.env.URL).then(() => {
   }).catch((error) => {
     console.error('Failed to connect to MongoDB:', error);
 })
+
 
 
 

@@ -1,5 +1,6 @@
 import Product from "../models/ProductModule.js";
 import { asyncHandler } from "../middleWare/errorHandler.js";
+import mongoose from "mongoose";
 
 // @desc    Create new product
 // @route   POST /api/products
@@ -28,7 +29,7 @@ export const getAllProducts = asyncHandler(async (req, res) => {
   const limit = Number(req.query.limit) || 10;
   const skip = (page - 1) * limit;
 
-  const products = await Product.find().skip(skip).limit(limit);
+  const products = await Product.find().populate("category").skip(skip).limit(limit);
   const count = await Product.countDocuments();
 
   res.json({
@@ -57,7 +58,12 @@ export const getProductById = asyncHandler(async (req, res) => {
 // @route   GET /api/products/category/:category
 // @access  Public
 export const getProductsByCategory = asyncHandler(async (req, res) => {
-  const products = await Product.find({ category: req.params.id });
+  const {cat} = req.body
+  console.log(cat);
+  const objectIds = cat.map(id => new mongoose.Types.ObjectId(id));
+  console.log(objectIds);
+  
+  const products = await Product.find({ category: {$in: objectIds} });
 
   if (!products || products.length === 0) {
     res.status(404);

@@ -15,7 +15,7 @@ const productRouter = express.Router();
 
 productRouter.get("/",auth, getAllProducts);                // Get all products (paginated)
 productRouter.get("/:id", auth,getProductById);             // Get single product by ID
-productRouter.get("/category/:id",auth, getProductsByCategory); // Get products by id
+productRouter.post("/category",auth, getProductsByCategory); // Get products by id
 
 
 productRouter.post("/", auth, admin, createProduct);       // Admin create
