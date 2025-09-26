@@ -9,8 +9,19 @@ import {errorHandler} from './middleWare/errorHandler.js';
 import cartRoute from './router/cart.route.js';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+
+
 dotenv.config();
 const app = express();
+const server = createServer(app); 
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3001",
+    methods: ["GET", "POST"],
+  },
+});
 app.use(express.json());
 app.use(cors({origin:"http://localhost:3001"}));
 app.use('/user',userRouter);
@@ -27,6 +38,61 @@ mongoose.connect(process.env.URL).then(() => {
     console.error('Failed to connect to MongoDB:', error);
 })
 
+const onlineUsers = new Map(); // userId -> { socketId, role }
+
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
+  // Register user/admin as online
+  socket.on("user-online", ({ userId, role }) => {
+    onlineUsers.set(userId, { socketId: socket.id, role });
+    console.log(`User ${userId} (${role}) is online on socket ${socket.id}`);
+  });
+
+  // User places order → notify ALL admins
+  socket.on("order-placed", (payload) => {
+    // payload = { userId, orderId, message }
+    const { userId, orderId, message } = payload;
+    console.log(`User ${userId} placed order ${orderId}`);
+
+    // Loop through online users and notify all admins
+    onlineUsers.forEach(({ socketId, role }, id) => {
+      if (role === "admin") {
+        io.to(socketId).emit("notify-admin", {
+          from: userId,
+          orderId,
+          message,
+        });
+      }
+    });
+  });
+
+  // Admin accepts order → notify the specific user
+  socket.on("order-accepted", (payload) => {
+    // payload = { adminId, userId, orderId, message }
+    const { adminId, userId, orderId, message } = payload;
+    console.log(`Admin ${adminId} accepted order ${orderId}`);
+
+    const user = onlineUsers.get(userId);
+    if (user) {
+      io.to(user.socketId).emit("notify-user", {
+        from: adminId,
+        orderId,
+        message,
+      });
+    }
+  });
+
+  // Handle disconnect
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+    onlineUsers.forEach((data, userId) => {
+      if (socket.id === data.socketId) {
+        onlineUsers.delete(userId);
+      }
+    });
+  });
+});
 
 
 
@@ -36,6 +102,7 @@ mongoose.connect(process.env.URL).then(() => {
 
 
 
-app.listen(3000, () => {
+
+server.listen(3000, () => {
   console.log('Server is running on port 3000');
 });
