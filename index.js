@@ -11,6 +11,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
+import wishlistRoute from './router/wishlist.route.js';
 
 
 dotenv.config();
@@ -29,6 +30,7 @@ app.use('/categories',categoryRouter);
 app.use('/orders', orderRouter);
 app.use("/api/products", productRouter);
 app.use('/cart', cartRoute);
+app.use('/fav', wishlistRoute);
 app.use(errorHandler);
 app.use("/payments", paymentRouter);
 
