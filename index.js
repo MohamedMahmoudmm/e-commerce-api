@@ -69,15 +69,13 @@ io.on("connection", (socket) => {
 
   // Admin accepts order → notify the specific user
   socket.on("order-accepted", (payload) => {
-    // payload = { adminId, userId, orderId, message }
-    const { adminId, userId, orderId, message } = payload;
-    console.log(`Admin ${adminId} accepted order ${orderId}`);
+    // payload = {  userId, message }
+    const {  userId, message } = payload;
+    console.log(`Admin accepted order`);
 
     const user = onlineUsers.get(userId);
     if (user) {
       io.to(user.socketId).emit("notify-user", {
-        from: adminId,
-        orderId,
         message,
       });
     }

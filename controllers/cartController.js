@@ -56,7 +56,7 @@ export const myCart =asyncHandler( async (req, res) => {
             //   { productId: { _id:"66b...", name:"AirPods", price: 3000 }, quantity: 2 },
             //   { productId: { _id:"66c...", name:"Case",    price: 200  }, quantity: 1 },
             // ]
-            .populate('items.productId');
+            .populate({path:'items.productId',populate:{path:'category',select:'cat_name'}});
         if (!cart) { res.status(404); throw new Error(" cart not found ");}
         res.status(200).json({ status: "success", message: "My cart", data: cart });
      

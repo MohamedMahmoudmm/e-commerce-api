@@ -24,7 +24,7 @@ export const login = async(req,res)=>{
     return res.status(400).json({ message: "User already logged in " });
   }
     let token = jwt.sign(
-        {_id : findUser._id, role: findUser.role, email: findUser.email}, "mearn",{ expiresIn: "24h" }
+        {_id : findUser._id, role: findUser.role, email: findUser.email}, "mearn"
     )
     await userModel.findByIdAndUpdate(findUser._id, { token });
     return res.json({message:"User login successfully", user:findUser, token:token})
