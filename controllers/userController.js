@@ -2,15 +2,24 @@ import jwt from "jsonwebtoken"
 import userModel from "../models/userModel.js";
 import bcrypt from "bcrypt" 
 import sendEmail from "../email/email.js";
-import { resetPasswordTemplate } from "../email/emailTem.js";
+import { resetPasswordTemplate } from "../email/resetPasswordTemplate.js";
+import { template } from "../email/VerifyemailTemlate.js";
 
 
 export const signUp =  async(req,res)=>{
     req.body.password = await bcrypt.hash(req.body.password,8);    
     let addUser = await userModel.insertMany(req.body);
     addUser[0].password = undefined;
-    sendEmail(req.body.email)
-    res.status(201).json({message:"User sign up successfully",user:addUser})
+
+    // Generate token for verification
+ const token = jwt.sign({ email: req.body.email }, "myEmail", { expiresIn: "1h" });
+const verificationLink = `http://localhost:3000/user/verify/${token}`;
+
+const htmlTemplate = template(verificationLink);
+
+await sendEmail(req.body.email, "Verify Your Email", htmlTemplate);
+
+    res.status(201).json({message:"User sign up successfully", user:addUser})
 }
 
 export const login = async(req,res)=>{
@@ -64,15 +73,27 @@ export const updateUser = async (req, res) => {
   }
 };
 
-export const verifyAccount = async(req,res)=>{
-    jwt.verify(req.params.email,"myEmail",async(err,decoded)=>{
-        if(err) {
-            return res.status(401).json({message:"Invalid token"});
-        }
-        await userModel.findOneAndUpdate({email:decoded},{isConfirmed:true})  
-        res.status(200).json({message:"Account verified successfully"})
-    })
-}
+export const verifyAccount = async (req, res) => {
+  try {
+    const { token } = req.params;
+
+    // verify token
+    const decoded = jwt.verify(token, "myEmail");
+
+    // تحديث حالة اليوزر
+    await userModel.findOneAndUpdate(
+      { email: decoded.email },
+      { isConfirmed: true }
+    );
+
+    // redirect للفرونت إند login page
+    res.redirect("http://localhost:3001/login");
+  } catch (err) {
+    console.error("Verify error:", err);
+    // في حالة التوكن منتهي أو غير صالح
+    res.redirect("http://localhost:3001/signup"); 
+  }
+};
 
 
 export const forgotPassword = async (req, res) => {
