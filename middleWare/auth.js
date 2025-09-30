@@ -8,9 +8,9 @@ export const auth = async (req, res, next) => {
 
     let decoded = jwt.verify(token, "mearn");
 
-    let user = await userModel.findOne({ _id: decoded._id, token });
+    let user = await userModel.findById(decoded._id);
     if (!user) {
-      return res.status(401).json({ message: "Token is invalid or logged out" });
+      return res.status(401).json({ message: "User not found" });
     }
 
     req.user = decoded;
