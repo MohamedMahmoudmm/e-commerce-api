@@ -12,7 +12,8 @@ userRouter.post("/signup",signUpValidator,handleValidationErrors, checkEmail, si
 userRouter.post("/login", login);
 userRouter.post("/logout", auth, logout)
 userRouter.put("/update",updateValidator,handleValidationErrors, auth, updateUser);
-userRouter.get("/verify/:email", verifyAccount);
+userRouter.get("/verify/:token", verifyAccount);
+
 
 userRouter.post("/forgot-password", forgotPassword);
 userRouter.post("/reset-password", resetPassword);

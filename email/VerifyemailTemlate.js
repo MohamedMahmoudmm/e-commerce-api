@@ -1,4 +1,4 @@
-export const template = (email) => {
+export const template = (verificationLink) => {
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -65,7 +65,7 @@ export const template = (email) => {
     </div>
     <h1>Verify Your Email Address</h1>
     <p>Welcome! Please confirm your email address to complete your account setup. Just click the button below:</p>
-    <a href="http://localhost:3000/user/verify/${email}" class="btn" target="_blank">Verify Email</a>
+    <a href="${verificationLink}" class="btn" target="_blank">Verify Email</a>
     <p>If you didn’t create an account, you can safely ignore this email.</p>
     <div class="footer">
       © ${new Date().getFullYear()} Your Company. All rights reserved.
