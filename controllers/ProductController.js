@@ -26,7 +26,7 @@ export const createProduct = asyncHandler(async (req, res) => {
 // @access  Public
 export const getAllProducts = asyncHandler(async (req, res) => {
   const page = Number(req.query.page) || 1;
-  const limit = Number(req.query.limit) || 10;
+  const limit = Number(req.query.limit) || 200;
   const skip = (page - 1) * limit;
 
   const products = await Product.find().populate("category").skip(skip).limit(limit);
