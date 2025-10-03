@@ -1,6 +1,6 @@
 import express  from "express";
 import { checkEmail } from "../middleWare/checkEmail.js";
-import { login, signUp, verifyAccount ,logout, updateUser, forgotPassword, resetPassword } from "../controllers/userController.js";
+import { login, signUp, verifyAccount ,logout, updateUser, forgotPassword, resetPassword, getUserProfile } from "../controllers/userController.js";
 import { auth } from "../middleWare/auth.js";
 import { signUpValidator, updateValidator } from "../middleWare/valitators/userValidator.js";
 import { handleValidationErrors } from "../middleWare/handleValidationErrors.js";
@@ -13,8 +13,7 @@ userRouter.post("/login", login);
 userRouter.post("/logout", auth, logout)
 userRouter.put("/update",updateValidator,handleValidationErrors, auth, updateUser);
 userRouter.get("/verify/:token", verifyAccount);
-
-
+userRouter.get("/profile", auth, getUserProfile); 
 userRouter.post("/forgot-password", forgotPassword);
 userRouter.post("/reset-password", resetPassword);
 
